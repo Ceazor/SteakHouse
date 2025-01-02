@@ -13,6 +13,8 @@ contract SteakHouse is IGauge{
 
     uint256 public lockTime = 14 days;
 
+    bool public init;
+
     uint public derivedSupply;
     mapping(address => uint) public derivedBalances;
 
@@ -73,10 +75,16 @@ contract SteakHouse is IGauge{
     event Withdraw(address indexed from, uint amount);
     event NotifyReward(address indexed from, address indexed reward, uint amount);
     event ClaimRewards(address indexed from, address indexed reward, uint amount);
+    event TeamChanged(address indexed team);
 
-    constructor(address _stake, address[] memory _allowedRewardTokens, address _team) {
-        stake = _stake;
+    constructor(address _team) {
         team = _team;
+    }    
+    
+    function initStakeHouse(address _stake, address[] memory _allowedRewardTokens) public {
+        require(msg.sender == team, 'only team');
+        require(!init, 'already init');
+        stake = _stake;
 
         for (uint i; i < _allowedRewardTokens.length; i++) {
             if (_allowedRewardTokens[i] != address(0)) {
@@ -84,6 +92,16 @@ contract SteakHouse is IGauge{
                 rewards.push(_allowedRewardTokens[i]);
             }
         }
+        init = true;
+    }
+
+
+
+    function changeTeam(address _newTeam) public {
+        require(msg.sender == team, 'only team');
+        team = _newTeam;
+        emit TeamChanged(team);
+
     }
 
     // simple re-entrancy check

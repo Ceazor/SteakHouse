@@ -11,14 +11,30 @@ contract SteakHouseFeeCollector{
     address public salt;
     address public pepper;
     address public steakHouse;
+    address public steak;
+
     address public team;
+    bool public init;
 
-
-    constructor(address _salt, address _pepper, address _steakHouse, address _team) {
-        salt = _salt;
-        pepper = _pepper;
-        steakHouse = _steakHouse;
+    constructor(address _team) {
         team = _team;
+    }   
+
+    function initFeeCollector(address _steakHouse) public {
+        require(msg.sender == team, 'only team');
+        require(!init, 'already init');
+
+        steakHouse = _steakHouse;
+        steak = steakHouse.stake();
+        salt = steakHouse.rewards[0];
+        pepper = steakHouse.rewards[1];
+        init = true;
+    }
+
+    function changeTeam(address _newTeam) public {
+        require(msg.sender == team, 'only team');
+        team = _newTeam;
+        emit TeamChanged(team);
 
     }
 
