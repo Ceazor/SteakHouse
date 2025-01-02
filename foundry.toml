@@ -10,7 +10,6 @@ remappings = [
     "openzeppelin-contracts/=lib/openzeppelin-contracts/",
     "solmate/=lib/solmate/src/",
     "halmos-cheatcodes/=lib/openzeppelin-contracts/lib/halmos-cheatcodes/src/",
-    "openzeppelin/=lib/openzeppelin-contracts/contracts/",
 ]
 
 # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options

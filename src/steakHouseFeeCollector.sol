@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.20;
 
-import 'openzeppelin-contracts/contracts/utils/math/Math.sol';
-import "openzeppelin-contracts/contracts/interfaces/IERC20.sol";
+import "@openzeppelin/contracts/utils/math/Math.sol";
+import "@openzeppelin/contracts/interfaces/IERC20.sol";
 import "src/steakHouse.sol";
 
 // Gauges are used to incentivize pools, they emit reward tokens over 7 days for staked LP tokens
@@ -15,6 +15,11 @@ contract SteakHouseFeeCollector{
 
     address public team;
     bool public init;
+
+    event TeamChanged(address indexed team);
+    event SaltedSteak(uint256 indexed saltAmt);
+    event PepperedSteak(uint256 indexed pepperAmt);
+
 
     constructor(address _team) {
         team = _team;
@@ -50,6 +55,8 @@ contract SteakHouseFeeCollector{
 
             IERC20(salt).approve(steakHouse, saltCollected);
             SteakHouse(steakHouse).notifyRewardAmount(salt, saltCollected);
+
+            emit SaltedSteak(saltCollected);
             
     }
 
@@ -60,17 +67,19 @@ contract SteakHouseFeeCollector{
     
             IERC20(pepper).approve(steakHouse, pepperCollected);
             SteakHouse(steakHouse).notifyRewardAmount(pepper, pepperCollected);
+
+            emit PepperedSteak(pepperCollected);
     }            
 
 
-    function checkSaltShaker() public view returns (bool){
+    function checkSaltShaker() public view returns (bool enufSalt){
         uint256 saltCollected = IERC20(salt).balanceOf(address(this));
         uint256 leftRewards = SteakHouse(steakHouse).left(salt);
-            if(saltCollected > leftReward){
+            if(saltCollected > leftRewards){
             return true;
             }
     }
-    function checkPepperShaker() public view returns (bool){
+    function checkPepperShaker() public view returns (bool enufPepper){
         uint256 pepperCollected = IERC20(pepper).balanceOf(address(this));
         uint256 leftRewards = SteakHouse(steakHouse).left(pepper);
             if(pepperCollected > leftRewards){

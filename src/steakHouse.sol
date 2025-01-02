@@ -7,19 +7,23 @@ import "openzeppelin-contracts/contracts/interfaces/IERC20.sol";
 // Gauges are used to incentivize pools, they emit reward tokens over 7 days for staked LP tokens
 contract SteakHouse {
 
-    address public immutable stake; // the LP token that needs to be staked for rewards
+    address public stake; // the LP token that needs to be staked for rewards
     address public team;
 
-    uint256 public lockTime = 14 days;
 
     bool public init;
 
     uint public derivedSupply;
     mapping(address => uint) public derivedBalances;
 
-    uint internal constant DURATION = 7 days; // rewards are released over 7 days
+    uint256 constant private ONE_DAY = 86400;
+    uint256 constant internal ONE_WEEK = ONE_DAY * 7;
+    uint internal constant DURATION = 7 * ONE_DAY; // rewards are released over 7 days
     uint internal constant PRECISION = 10 ** 18;
     uint internal constant MAX_REWARD_TOKENS = 4;
+
+    uint256 public lockTime = 7 * ONE_DAY;
+
 
     // default snx staking contract implementation
     mapping(address => uint) public rewardRate;
@@ -509,7 +513,6 @@ contract SteakHouse {
     }
 
     function notifyRewardAmount(address token, uint amount) external lock {
-        require(token != stake);
         require(amount > 0);
         if (!isReward[token]) {
             require(rewards.length < MAX_REWARD_TOKENS, "too many rewards tokens");
