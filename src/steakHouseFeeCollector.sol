@@ -46,6 +46,8 @@ contract SteakHouseFeeCollector{
     function transferSaltToGauge() public {
             require(checkSaltShaker() == true, 'need more salt');  // we are sending rewards only if we have more then the current rewards in the steakHouse
             
+            uint256 saltCollected = IERC20(salt).balanceOf(address(this));
+
             IERC20(salt).approve(steakHouse, saltCollected);
             SteakHouse(steakHouse).notifyRewardAmount(salt, saltCollected);
             
@@ -53,7 +55,9 @@ contract SteakHouseFeeCollector{
 
     function transferPepperToGauge() public {
             require(checkPepperShaker() == true , 'need more pepper');  // we are sending rewards only if we have more then the current rewards in the steakHouse
-                
+
+            uint256 pepperCollected = IERC20(pepper).balanceOf(address(this));
+    
             IERC20(pepper).approve(steakHouse, pepperCollected);
             SteakHouse(steakHouse).notifyRewardAmount(pepper, pepperCollected);
     }            
