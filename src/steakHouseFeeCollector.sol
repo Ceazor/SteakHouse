@@ -44,33 +44,34 @@ contract SteakHouseFeeCollector{
     }
 
     function transferSaltToGauge() public {
-        uint256 saltCollected = IERC20(salt).balanceOf(address(this));
-        uint256 leftRewards = SteakHouse(steakHouse).left(salt);
-
-            if(saltCollected > leftRewards) { // we are sending rewards only if we have more then the current rewards in the steakHouse
-                IERC20(salt).approve(steakHouse, saltCollected);
-                SteakHouse(steakHouse).notifyRewardAmount(salt, saltCollected);
-            }
+            require(checkSaltShaker() == true, 'need more salt');  // we are sending rewards only if we have more then the current rewards in the steakHouse
+            
+            IERC20(salt).approve(steakHouse, saltCollected);
+            SteakHouse(steakHouse).notifyRewardAmount(salt, saltCollected);
+            
     }
 
     function transferPepperToGauge() public {
-        uint256 pepperCollected = IERC20(pepper).balanceOf(address(this));
-        uint256 leftRewards = SteakHouse(steakHouse).left(pepper);
+            require(checkPepperShaker() == true , 'need more pepper');  // we are sending rewards only if we have more then the current rewards in the steakHouse
+                
+            IERC20(pepper).approve(steakHouse, pepperCollected);
+            SteakHouse(steakHouse).notifyRewardAmount(pepper, pepperCollected);
+    }            
 
-            if(pepperCollected > leftRewards) { // we are sending rewards only if we have more then the current rewards in the steakHouse
-                IERC20(pepper).approve(steakHouse, pepperCollected);
-                SteakHouse(steakHouse).notifyRewardAmount(pepper, pepperCollected);
+
+    function checkSaltShaker() public view returns (bool){
+        uint256 saltCollected = IERC20(salt).balanceOf(address(this));
+        uint256 leftRewards = SteakHouse(steakHouse).left(salt);
+            if(saltCollected > leftReward){
+            return true;
             }
     }
-
-
-    function checkSaltShaker() public view returns (uint){
-        uint256 saltCollected = IERC20(salt).balanceOf(address(this));
-        return saltCollected;
-    }
-    function checkPepperShaker() public view returns (uint){
+    function checkPepperShaker() public view returns (bool){
         uint256 pepperCollected = IERC20(pepper).balanceOf(address(this));
-        return pepperCollected;
+        uint256 leftRewards = SteakHouse(steakHouse).left(pepper);
+            if(pepperCollected > leftRewards){
+            return true;
+            }    
     }
 
 
