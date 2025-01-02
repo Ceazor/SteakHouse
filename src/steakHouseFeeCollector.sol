@@ -3,7 +3,7 @@ pragma solidity 0.8.20;
 
 import 'openzeppelin-contracts/contracts/utils/math/Math.sol';
 import "openzeppelin-contracts/contracts/interfaces/IERC20.sol";
-import 'src/interfaces/IGauge.sol';
+import "src/steakHouse.sol";
 
 // Gauges are used to incentivize pools, they emit reward tokens over 7 days for staked LP tokens
 contract SteakHouseFeeCollector{
@@ -25,9 +25,9 @@ contract SteakHouseFeeCollector{
         require(!init, 'already init');
 
         steakHouse = _steakHouse;
-        steak = steakHouse.stake();
-        salt = steakHouse.rewards[0];
-        pepper = steakHouse.rewards[1];
+        steak = SteakHouse(steakHouse).stake();
+        salt = SteakHouse(steakHouse).rewards(0);
+        pepper = SteakHouse(steakHouse).rewards(1);
         init = true;
     }
 
@@ -45,21 +45,21 @@ contract SteakHouseFeeCollector{
 
     function transferSaltToGauge() public {
         uint256 saltCollected = IERC20(salt).balanceOf(address(this));
-        uint256 leftRewards = IGauge(steakHouse).left(salt);
+        uint256 leftRewards = SteakHouse(steakHouse).left(salt);
 
             if(saltCollected > leftRewards) { // we are sending rewards only if we have more then the current rewards in the steakHouse
                 IERC20(salt).approve(steakHouse, saltCollected);
-                IGauge(steakHouse).notifyRewardAmount(salt, saltCollected);
+                SteakHouse(steakHouse).notifyRewardAmount(salt, saltCollected);
             }
     }
 
     function transferPepperToGauge() public {
         uint256 pepperCollected = IERC20(pepper).balanceOf(address(this));
-        uint256 leftRewards = IGauge(steakHouse).left(pepper);
+        uint256 leftRewards = SteakHouse(steakHouse).left(pepper);
 
             if(pepperCollected > leftRewards) { // we are sending rewards only if we have more then the current rewards in the steakHouse
                 IERC20(pepper).approve(steakHouse, pepperCollected);
-                IGauge(steakHouse).notifyRewardAmount(pepper, pepperCollected);
+                SteakHouse(steakHouse).notifyRewardAmount(pepper, pepperCollected);
             }
     }
 

@@ -3,10 +3,9 @@ pragma solidity 0.8.20;
 
 import 'openzeppelin-contracts/contracts/utils/math/Math.sol';
 import "openzeppelin-contracts/contracts/interfaces/IERC20.sol";
-import 'src/interfaces/IGauge.sol';
 
 // Gauges are used to incentivize pools, they emit reward tokens over 7 days for staked LP tokens
-contract SteakHouse is IGauge{
+contract SteakHouse {
 
     address public immutable stake; // the LP token that needs to be staked for rewards
     address public team;
