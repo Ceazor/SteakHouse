@@ -8,34 +8,58 @@ import 'src/interfaces/IGauge.sol';
 // Gauges are used to incentivize pools, they emit reward tokens over 7 days for staked LP tokens
 contract SteakHouseFeeCollector{
 
-    address public fee1;
-    address public fee2;
+    address public salt;
+    address public pepper;
     address public steakHouse;
     address public team;
 
 
-    constructor(address _fee1, address _fee2, address _steakHouse, address _team) {
-        fee1 = _fee1;
-        fee2 = _fee2;
+    constructor(address _salt, address _pepper, address _steakHouse, address _team) {
+        salt = _salt;
+        pepper = _pepper;
         steakHouse = _steakHouse;
         team = _team;
 
     }
 
-    function _transferFee1ToGauge() internal {
-        uint256 fee1Collected = IERC20(fee1).balanceOf(address(this));
-        uint256 leftRewards = IGauge(steakHouse).left(fee1);
+    function transferSaltToGauge() public {
+        uint256 saltCollected = IERC20(salt).balanceOf(address(this));
+        uint256 leftRewards = IGauge(steakHouse).left(salt);
 
-            if(fee1Collected > leftRewards) { // we are sending rewards only if we have more then the current rewards in the steakHouse
-                IERC20(fee1).approve(steakHouse, fee1Collected);
-                IGauge(steakHouse).notifyRewardAmount(fee1, fee1Collected);
+            if(saltCollected > leftRewards) { // we are sending rewards only if we have more then the current rewards in the steakHouse
+                IERC20(salt).approve(steakHouse, saltCollected);
+                IGauge(steakHouse).notifyRewardAmount(salt, saltCollected);
             }
+    }
+
+    function transferPepperToGauge() public {
+        uint256 pepperCollected = IERC20(pepper).balanceOf(address(this));
+        uint256 leftRewards = IGauge(steakHouse).left(pepper);
+
+            if(pepperCollected > leftRewards) { // we are sending rewards only if we have more then the current rewards in the steakHouse
+                IERC20(pepper).approve(steakHouse, pepperCollected);
+                IGauge(steakHouse).notifyRewardAmount(pepper, pepperCollected);
+            }
+    }
+
+    function seasonTheSteak() public {
+        transferPepperToGauge();
+        transferSaltToGauge();
+    }
+
+    function checkSaltShaker() public view returns (uint){
+        uint256 saltCollected = IERC20(salt).balanceOf(address(this));
+        return saltCollected;
+    }
+    function checkPepperShaker() public view returns (uint){
+        uint256 pepperCollected = IERC20(pepper).balanceOf(address(this));
+        return pepperCollected;
     }
 
 
     function sweepTokens(address _tokenToSweep, address _to) public {
         require(msg.sender == team, 'only team');
-        require(_tokenToSweep != fee1 && _tokenToSweep != fee2);
+        require(_tokenToSweep != salt && _tokenToSweep != pepper);
 
         uint256 _bal = IERC20(_tokenToSweep).balanceOf(address(this));
         IERC20(_tokenToSweep).transferFrom(address(this), _to, _bal);
