@@ -22,6 +22,11 @@ contract SteakHouseFeeCollector{
 
     }
 
+    function seasonTheSteak() public {
+        transferPepperToGauge();
+        transferSaltToGauge();
+    }
+
     function transferSaltToGauge() public {
         uint256 saltCollected = IERC20(salt).balanceOf(address(this));
         uint256 leftRewards = IGauge(steakHouse).left(salt);
@@ -42,10 +47,6 @@ contract SteakHouseFeeCollector{
             }
     }
 
-    function seasonTheSteak() public {
-        transferPepperToGauge();
-        transferSaltToGauge();
-    }
 
     function checkSaltShaker() public view returns (uint){
         uint256 saltCollected = IERC20(salt).balanceOf(address(this));
