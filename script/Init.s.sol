@@ -35,11 +35,13 @@ contract Init is Script {
         saltAndPepper[0] = steak;
         saltAndPepper[1] = cdxUSD;
 
-        SteakHouse.initStakeHouse(steak, saltAndPepper);
-        SteakHouseFeeCollector.initFeeCollector(steakHouseAddy, lpEscrow);
+        
 
-        SteakHouse.changeTeam(ceazor);
-        SteakHouseFeeCollector.changeTeam(ceazor);
+        SteakHouse(steakHouseAddy).initStakeHouse(steak, saltAndPepper);
+        SteakHouseFeeCollector(steakHouseFeeCollectorAddy).initFeeCollector(steakHouseAddy, lpEscrow);
+
+        SteakHouse(steakHouseAddy).changeTeam(ceazor);
+        SteakHouseFeeCollector(steakHouseFeeCollectorAddy).changeTeam(ceazor);
 
         vm.stopBroadcast();
     }
