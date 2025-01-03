@@ -3,6 +3,7 @@ pragma solidity 0.8.20;
 
 import "@openzeppelin/contracts/utils/math/Math.sol";
 import "@openzeppelin/contracts/interfaces/IERC20.sol";
+import "./interfaces/ILpEscrow.sol";
 import "src/steakHouse.sol";
 
 // Gauges are used to incentivize pools, they emit reward tokens over 7 days for staked LP tokens
@@ -12,6 +13,7 @@ contract SteakHouseFeeCollector{
     address public pepper;
     address public steakHouse;
     address public steak;
+    address public lpEscrow;
 
     address public team;
     bool public init;
@@ -25,10 +27,11 @@ contract SteakHouseFeeCollector{
         team = _team;
     }   
 
-    function initFeeCollector(address _steakHouse) public {
+    function initFeeCollector(address _steakHouse, address _lpEscrow) public {
         require(msg.sender == team, 'only team');
         require(!init, 'already init');
 
+        lpEscrow = _lpEscrow;
         steakHouse = _steakHouse;
         steak = SteakHouse(steakHouse).stake();
         salt = SteakHouse(steakHouse).rewards(0);
@@ -44,6 +47,7 @@ contract SteakHouseFeeCollector{
     }
 
     function seasonTheSteak() public {
+        getSaltAndPepperFromStorage();
         transferPepperToGauge();
         transferSaltToGauge();
     }
@@ -85,6 +89,9 @@ contract SteakHouseFeeCollector{
             if(pepperCollected > leftRewards){
             return true;
             }    
+    }
+    function getSaltAndPepperFromStorage() public {
+        ILpEscrow(lpEscrow).collectAndDistributeFees();
     }
 
 

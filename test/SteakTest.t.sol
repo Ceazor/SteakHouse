@@ -5,6 +5,7 @@ import "forge-std/console2.sol";
 import "solmate/test/utils/mocks/MockERC20.sol";
 import "src/steakHouse.sol";
 import "src/steakHouseFeeCollector.sol";
+import "src/mockLpEscrow.sol";
 
 
 contract SteakTest is Test{
@@ -18,7 +19,6 @@ contract SteakTest is Test{
     address constant ceazor = 0x3c5Aac016EF2F178e8699D6208796A2D67557fe2;
     address constant bill = 0xA67D2c03c3cfe6177a60cAed0a4cfDA7C7a563e0;
     address constant dan = 0x57163Ac75E95f3690be63CA43F6f27bb38B48453;
-    address constant fakeMFFees = 0x5615dEB798BB3E4dFa0139dFa1b3D433Cc23b72f;
     address cdxUSDAddy;
     address steakAddy;
 
@@ -27,32 +27,39 @@ contract SteakTest is Test{
     MockERC20 STEAK;
     SteakHouse steakHouse;
     SteakHouseFeeCollector steakHouseFeeCollector;
-
+    MockLpEscrow lpEscrow;
 
 
 
     function setUp() public {
+        deployCoins();
         deployContracts();
-        deployAndMintCoins();
         initContracts();
+        mintCoins();
 
     }
-
-    function deployContracts() public {
-        steakHouse = new SteakHouse(ceazor);
-        steakHouseFeeCollector = new SteakHouseFeeCollector(ceazor);
-    }
-    function deployAndMintCoins() public {
+    function deployCoins() public {
         cdxUSD = new MockERC20("cdxUSD", "cdxUSD", 18);
         STEAK = new MockERC20("STEAK", "STEAK", 18);
         cdxUSDAddy = address(cdxUSD);
-        steakAddy = address(STEAK);
+        steakAddy = address(STEAK);    
+    }
+    function deployContracts() public {
+        steakHouse = new SteakHouse(ceazor);
+        steakHouseFeeCollector = new SteakHouseFeeCollector(ceazor);
+        lpEscrow = new MockLpEscrow(steakAddy, cdxUSDAddy, address(steakHouseFeeCollector));
+
+    }
+    function mintCoins() public {
         STEAK.mint(bill, TOKEN_1M);
         STEAK.mint(dan, TOKEN_100K);
-        cdxUSD.mint(fakeMFFees, TOKEN_1 * 20);
-        STEAK.mint(fakeMFFees, TOKEN_1 * 20);
-    
-    }  
+        cdxUSD.mint(address(lpEscrow), TOKEN_1);
+        STEAK.mint(address(lpEscrow), TOKEN_1);
+    }
+    function mintMoreFee() public {
+        cdxUSD.mint(address(lpEscrow), TOKEN_1);
+        STEAK.mint(address(lpEscrow), TOKEN_1);
+    }
     function initContracts() public {
         address[] memory saltAndPepper = new address[](2);
         saltAndPepper[0] = address(STEAK);
@@ -61,7 +68,7 @@ contract SteakTest is Test{
         vm.startPrank(ceazor);
 
         steakHouse.initStakeHouse(address(STEAK), saltAndPepper);
-        steakHouseFeeCollector.initFeeCollector(address(steakHouse));
+        steakHouseFeeCollector.initFeeCollector(address(steakHouse),address(lpEscrow));
         vm.stopPrank();
     }
  
@@ -85,14 +92,6 @@ contract SteakTest is Test{
     }
 
     function testAddSaltAndPepper() public {
-        vm.startPrank(fakeMFFees);
-        STEAK.transfer(address(steakHouseFeeCollector), TOKEN_1);
-        cdxUSD.transfer(address(steakHouseFeeCollector), TOKEN_1);
-        vm.stopPrank();
-
-        assertEq(STEAK.balanceOf(address(steakHouseFeeCollector)), TOKEN_1);
-        assertEq(cdxUSD.balanceOf(address(steakHouseFeeCollector)), TOKEN_1);
-
         steakHouseFeeCollector.seasonTheSteak();
     }
 
@@ -100,11 +99,6 @@ contract SteakTest is Test{
         vm.startPrank(bill);
         STEAK.approve(address(steakHouse), TOKEN_100K);
         steakHouse.depositWithLock(bill, TOKEN_100K);
-        vm.stopPrank();
-
-        vm.startPrank(fakeMFFees);
-        STEAK.transfer(address(steakHouseFeeCollector), TOKEN_1);
-        cdxUSD.transfer(address(steakHouseFeeCollector), TOKEN_1);
         vm.stopPrank();
 
         steakHouseFeeCollector.seasonTheSteak();
@@ -136,11 +130,6 @@ contract SteakTest is Test{
         vm.startPrank(dan);
         STEAK.approve(address(steakHouse), TOKEN_100K);
         steakHouse.depositWithLock(dan, TOKEN_100K);
-        vm.stopPrank();
-
-        vm.startPrank(fakeMFFees);
-        STEAK.transfer(address(steakHouseFeeCollector), TOKEN_1);
-        cdxUSD.transfer(address(steakHouseFeeCollector), TOKEN_1);
         vm.stopPrank();
 
         steakHouseFeeCollector.seasonTheSteak();
@@ -180,11 +169,6 @@ contract SteakTest is Test{
         steakHouse.depositWithLock(dan, TOKEN_100K);
         vm.stopPrank();
 
-        vm.startPrank(fakeMFFees);
-        STEAK.transfer(address(steakHouseFeeCollector), TOKEN_1);
-        cdxUSD.transfer(address(steakHouseFeeCollector), TOKEN_1);
-        vm.stopPrank();
-
         steakHouseFeeCollector.seasonTheSteak();
 
         vm.warp(ONE_WEEK + 2);
@@ -192,12 +176,8 @@ contract SteakTest is Test{
         vm.startPrank(bill);
         steakHouse.withdrawAll();
         vm.stopPrank();
-
-        vm.startPrank(fakeMFFees);
-        STEAK.transfer(address(steakHouseFeeCollector), TOKEN_1);
-        cdxUSD.transfer(address(steakHouseFeeCollector), TOKEN_1);
-        vm.stopPrank();
-
+        
+        mintMoreFee();
         steakHouseFeeCollector.seasonTheSteak();
 
         vm.warp(ONE_WEEK + ONE_WEEK + 2);
