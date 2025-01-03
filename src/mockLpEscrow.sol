@@ -6,7 +6,7 @@ import "openzeppelin-contracts/contracts/interfaces/IERC20.sol";
 import 'src/interfaces/ILpEscrow.sol';
 
 // Gauges are used to incentivize pools, they emit reward tokens over 7 days for staked LP tokens
-contract MockLpEscrow is  ILpEscrow{
+contract MockLpEscrow is ILpEscrow{
 
     address public salt;
     address public pepper;
