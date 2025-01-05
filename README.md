@@ -17,3 +17,7 @@ If you already have $STEAK staked in the steakhouse and you stake more STEAK thi
 What is Season The Steak?
 
 This is a function that can be called by anyone to take the trading fees and apply them as rewards on the steakhouse. This can only be done if the fees are greater than the current rewards to avoid spamming the contracts. The fees can be applied one a time by calling either SaltTheSteak or PepperTheSteak, or both at by calling SeasonTheSteak.
+
+What is Get the Salt and Pepper from Storage?
+
+This is a function that collects the trading fees from the pool on Aerodrome and puts them into the fee collector. This function can be called at any time but does NOT apply them to the steakhouse as rewards. If Season the Steak function is currently not executable, calling this function might collect enough fees to make it executable  

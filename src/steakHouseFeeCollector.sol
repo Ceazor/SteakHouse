@@ -46,6 +46,12 @@ contract SteakHouseFeeCollector{
 
     }
 
+    function setNewLPEscrow(address _newEscrow) public {
+        require(msg.sender == team, 'only team');
+        lpEscrow = _newEscrow;
+
+    }
+
     function seasonTheSteak() public {
         getSaltAndPepperFromStorage();
         transferPepperToGauge();
