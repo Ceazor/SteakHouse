@@ -10,7 +10,6 @@ contract SteakHouse {
     address public stake; // the LP token that needs to be staked for rewards
     address public team;
 
-
     bool public init;
 
     uint public derivedSupply;
@@ -22,7 +21,7 @@ contract SteakHouse {
     uint internal constant PRECISION = 10 ** 18;
     uint internal constant MAX_REWARD_TOKENS = 4;
 
-    uint256 public lockTime = 7 * ONE_DAY;
+    uint256 public lockTime = 14 * ONE_DAY;
 
 
     // default snx staking contract implementation
@@ -558,7 +557,7 @@ contract SteakHouse {
 
     function changeLockTime(uint256 _newLockTime) external {
         require(msg.sender == team, 'only team');
-        require(_newLockTime <= 14 days);
+        require(_newLockTime <= ONE_WEEK * 2);
         lockTime = _newLockTime;
     }
 
